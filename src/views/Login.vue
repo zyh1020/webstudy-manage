@@ -1,12 +1,20 @@
 <template>
     <div class="login">
-        <div class="login_box">
+        <div class="login_box"
+             v-loading="loading"
+             element-loading-text="正在登录"
+             element-loading-spinner="el-icon-loading"
+             element-loading-background="rgba(0, 0, 0, 0.8)">
             <!-- 头像区域 -->
             <div class="avatar_box">
                 <img src="../assets/logo.png" >
             </div>
             <!-- 登录表单区域 -->
-            <el-form label-width="0px" ref="loginFrormRef" :model="loginForm" :rules="loginFormRules" class="login_from">
+            <el-form label-width="0px"
+                     ref="loginFrormRef"
+                     :model="loginForm"
+                     :rules="loginFormRules"
+                     class="login_from">
                 <el-form-item prop="username">
                     <el-input prefix-icon="iconfont icon-user-line" v-model="loginForm.username"/>
                 </el-form-item>
@@ -23,10 +31,13 @@
 </template>
 
 <script>
+    import {login} from '@/api/login'
+
     export default {
         name: "Login",
         data(){
             return{
+                loading: false,
                 loginForm:{
                     username:'admin',
                     password:'123456'
@@ -38,9 +49,8 @@
                     ],
                     password:[
                         { required: true, message: '请输入密码', trigger: 'blur' },
-                        { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+                        { min: 3, max: 6, message: '长度在 3 到 6  个字符', trigger: 'blur' }
                     ]
-
 
                 }
 
@@ -50,7 +60,17 @@
             userLogin(){
                 this.$refs.loginFrormRef.validate((valid)=>{
                     if (valid) {
-                        alert('submit!');
+                        this.loading = true;
+                        // 登录
+                        login(this.loginForm).then( response => {
+                              if(response){
+                                let token =  response.data;
+                                window.sessionStorage.setItem("token",token);
+                                this.$router.replace('/home');
+                              }
+                            this.loading = false;
+                        });
+
                     } else {
                         this.$message({
                             message: '警告哦，请填写正确的表单内容',
@@ -58,7 +78,8 @@
                         });
                         return false;
                     }
-                })
+                });
+
             },
             resetLoginForm(){
                 // 重置表单验证
