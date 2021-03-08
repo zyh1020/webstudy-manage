@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 
 // 获取菜单
-export function getMenus(){
+export function  getMenus(){
     return request({
         url: '/system/cfg/menus',
         method: 'get'

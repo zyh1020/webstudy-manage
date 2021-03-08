@@ -2,7 +2,11 @@
     <div class="home">
         <el-container>
             <!-- 头部 -->
-            <el-header>头部</el-header>
+            <el-header class="homeHeard">
+                <div class="heardTitle">
+                    web学习交流平台
+                </div>
+            </el-header>
             <!-- 内容 -->
             <el-container>
                 <!-- 1，内容侧边 -->
@@ -46,5 +50,16 @@
 </script>
 
 <style>
-
+    .homeHeard{
+        background-color: #696969;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 15px;
+    }
+    .heardTitle{
+        font-size: 23px;
+        font-family: 华文楷体;
+        color: #ffff;
+    }
 </style>

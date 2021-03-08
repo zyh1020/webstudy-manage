@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import {getMenus,formatRoutes} from '@/api/security/menu'
 // ①，使用插件
 Vue.use(Vuex);
 
@@ -11,10 +12,24 @@ const store = new Vuex.Store({
     },
     mutations:{
         // 初始化路由数组
-        initRouters(state,data){
+        changeRouters(state,data){
             state.routers = data;
         }
+    },
+    actions:{
+        async generateRoutes({ commit }){
+            // 获取后台路由
+            const asyncRouter = await getMenus();
+            return new Promise(resolve => {
+                const tmp = asyncRouter.data;
+                const accessedRoutes = formatRoutes(tmp);
+                commit('changeRouters', accessedRoutes);
+                resolve(accessedRoutes);
+            })
+
+        }
     }
+
 
 });
 

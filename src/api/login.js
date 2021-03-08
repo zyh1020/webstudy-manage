@@ -8,3 +8,11 @@ export function login(params){
         data: params
     });
 }
+
+// 获取用户信息
+export function getUserInfo(params){
+    return request({
+        url: '/user/login',
+        method: 'get',
+    });
+}
