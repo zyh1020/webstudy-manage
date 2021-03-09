@@ -15,13 +15,9 @@ router.beforeEach(async(to, from, next) => {
          next();
      }else { // 不存在,获取用户菜单
          const accessRoutes =  await store.dispatch("generateRoutes");
-         console.log("accessRoutes:"+JSON.stringify(accessRoutes));
          router.addRoutes(accessRoutes);// 动态添加可访问的路由
          next({ ...to, replace: true })
      }
-
-     // ③，获用户的登录信息
-
 
   }else{ // 未登录
     if(whiteList.indexOf(to.path) !== -1){ // 访问免登录白名单
