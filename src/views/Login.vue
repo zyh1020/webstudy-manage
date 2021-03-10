@@ -66,7 +66,13 @@
                               if(response){
                                 let token =  response.data;
                                 window.sessionStorage.setItem("token",token);
-                                this.$router.replace('/home');
+                                let path = this.$route.query.redirect;
+                                if(path == undefined || path == "/"){
+                                    this.$router.replace('/home');
+                                }else{
+                                    this.$router.replace(path);
+                                }
+
                               }
                             this.loading = false;
                         });

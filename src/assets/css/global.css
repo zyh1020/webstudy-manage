@@ -4,3 +4,7 @@ html,body,#app{
     margin: 0;
     padding: 0;
 }
+/* 导航和卡片之间添加间隔 */
+.el-breadcrumb{
+    margin-bottom: 15px;
+}

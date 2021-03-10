@@ -1,10 +1,24 @@
 {
-  "id": "",
-  "name": "",
+  "id": "2393530",
+  "name": "webstudy",
   "font_family": "iconfont",
   "css_prefix_text": "icon-",
   "description": "",
   "glyphs": [
+    {
+      "icon_id": "7090061",
+      "name": "双箭头 上",
+      "font_class": "shuangjiantoushang",
+      "unicode": "e713",
+      "unicode_decimal": 59155
+    },
+    {
+      "icon_id": "20294454",
+      "name": "双箭头 下",
+      "font_class": "shuangjiantouxia-copy",
+      "unicode": "e715",
+      "unicode_decimal": 59157
+    },
     {
       "icon_id": "6119261",
       "name": "用户",
