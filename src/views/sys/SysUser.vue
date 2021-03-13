@@ -99,7 +99,6 @@
                             width="180">
                     </el-table-column>
                     <el-table-column
-                            prop="address"
                             label="操作"
                             width="180"
                             fixed="right">

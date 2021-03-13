@@ -1,9 +1,17 @@
 import request from '@/utils/request'
 
 // 获取菜单
-export function  getMenus(){
+export function getMenus(){
     return request({
-        url: '/system/cfg/menus',
+        url: '/system/menus/getMenusByUserId',
+        method: 'get'
+    });
+}
+
+// 获取所有的权限
+export function  getAllAuthority(){
+    return request({
+        url: '/system/menus/getAllAuthority',
         method: 'get'
     });
 }
