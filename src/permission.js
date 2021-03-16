@@ -24,7 +24,7 @@ router.beforeEach(async(to, from, next) => {
       next();
     }else{  // 未登录且访问不是免登录白名单
       Message.error({message:'尚未登录,请登录！'});
-      next(`/login?redirect=${to.path}`);// 没重定向到登录页面，并传递参数，想要访问的页面。
+      next(`/login`);// 没重定向到登录页面，并传递参数，想要访问的页面。
     }
   }
 
