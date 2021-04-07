@@ -25,6 +25,7 @@ export function formatRoutes(routers){
             component,
             name,
             icon,
+            hidden,
             children
         } = router;
         if(children && children instanceof Array){
@@ -34,6 +35,7 @@ export function formatRoutes(routers){
             path:path,
             name:name,
             icon:icon,
+            hidden:hidden,
             children:children,
             component(resolve){
                 require(['@/views' + component + '.vue'], resolve);

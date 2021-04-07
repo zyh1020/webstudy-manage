@@ -40,11 +40,10 @@
                                 <i class="el-icon-message"></i>
                                 <span>{{pMenus.name}}</span>
                             </template>
-
                             <el-menu-item :index="cMenus.path"
                                           v-for="(cMenus,cIndex) in pMenus.children"
                                           :key="cIndex"
-                                          v-if="!pMenus.hidden">
+                                          v-if="!cMenus.hidden">
                                           {{cMenus.name}}
                             </el-menu-item>
                         </el-submenu>
