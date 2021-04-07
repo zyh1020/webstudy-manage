@@ -40,7 +40,6 @@
                     <el-button type="primary" size="medium">置空</el-button>
                 </div>
             </transition>
-
             <!-- 数据表格 -->
             <div class="tableData">
                 <el-table
@@ -87,7 +86,6 @@
                     </el-table-column>
                 </el-table>
             </div>
-
         </el-card>
 
         <!-- 分配角色弹出框 -->
@@ -112,7 +110,7 @@
 </template>
 
 <script>
-    import {getAllUsers} from '@/api/security/user'
+    import {getAllUsers,distributionRoles} from '@/api/security/user'
     import {findAllRoles} from '@/api/security/role'
     export default {
         name: "SysCfg",
@@ -176,8 +174,16 @@
             // 分配角色权限
             setRoles(){
                 console.log("已拥有的角色:"+this.defaultRoles);
-            }
+                distributionRoles(this.userId,this.defaultRoles).then(response => {
+                    // 重新获取用户信息
+                    this.getUserList();
+                });
+                // 关闭窗口
+                this.rolesDialogShow = false;
 
+
+
+            }
         },
         created() {
             this.getUserList();

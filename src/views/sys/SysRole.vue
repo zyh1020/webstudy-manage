@@ -26,7 +26,6 @@
                     </el-col>
                 </el-row>
             </div>
-
             <!-- 内容 -->
             <div class="contentRoles">
                 <el-table
@@ -85,7 +84,6 @@
                     </el-table-column>
                 </el-table>
             </div>
-
         </el-card>
 
         <!-- 分配权限对话框 -->
@@ -114,7 +112,7 @@
 </template>
 
 <script>
-    import {getAllRoles} from '@/api/security/role'
+    import {getAllRoles,doAssion,deleteAssion} from '@/api/security/role'
     import {getAllAuthority} from '@/api/security/menu'
     export default {
         name: "SysRole",
@@ -166,12 +164,6 @@
                 // 默认展开的角色
                 this.roleId = '';
             },
-            // 为角色分配权限
-            setAuthority(){
-                // 角色id，在展示分配权限的时候获取的 this.roleId
-                this.$refs.rightsTree.getCheckedKeys(); // 全选
-                this.$refs.rightsTree.getHalfCheckedKeys(); // 半选
-            },
             // 删除角色的权限
             deleteRoleOfMenus(role,menu){
                 this.$confirm('此操作将永久删除“'+role.nameZh+'”的“'+menu.name+'”权限', '提示', {
@@ -180,6 +172,11 @@
                     type: 'warning'
                 }).then(() => {
                     // 调用删除方法，返回的是该角色的最新权限
+                    deleteAssion(role.id,menu.id).then(response =>{
+                        if(response){
+                            role.sysMenus = response.data; // 将最新的角色权限
+                        }
+                    });
                     //role.sysMenus = 该角色的最新权限
                 }).catch(() => {
                     this.$message({
@@ -187,6 +184,20 @@
                         message: '已取消删除'
                     });
                 });
+            },
+            // 为角色分配权限
+            setAuthority(){
+                // 角色id，在展示分配权限的时候获取的 this.roleId
+                let checkedKeys = this.$refs.rightsTree.getCheckedKeys(); // 全选
+                let halfCheckedKeys = this.$refs.rightsTree.getHalfCheckedKeys(); // 半选
+                doAssion(this.roleId,[...checkedKeys,...halfCheckedKeys]).then(response => {
+                    if(response){
+                        // 重新获取角色列表
+                        this.getRolesList();
+                    }
+                });
+                // 关闭对话框
+                this.showSetRightDialogVisible = false;
             },
             // 获取全部权限
             async getAllMenus(){
@@ -198,11 +209,14 @@
             // 通过递归的方式获取角色下所有的三级节点的id，并保存到defaultMenus数组中
             getLeafKeys(menus,arr){
                 for(let menu of menus){
-                    if(menu.level == 3){ // 是三级节点
-                        return arr.push(menu.id+'');
+                    console.log(menu.id+"长度:"+menu.children.length);
+                    if(menu.children.length == 0){ // 是叶子节点
+                        arr.push(menu.id);
+                    }else{
+                        // 不是叶子节点
+                        this.getLeafKeys(menu.children,arr); // 递归
                     }
-                    // 不是三级节点
-                   this.getLeafKeys(menu.children,arr); // 递归
+
                 }
             }
         },
