@@ -1,8 +1,16 @@
 import request from '@/utils/request'
 
-export function getAllCategory(){ // 查询所有分类
+export function getAllCategory(){ // 查询所有分类 树型
     return request({
         url: '/sort/category/findAll',
+        method: 'get'
+    });
+}
+
+
+export function getAllCategoryList(){ // 查询所有分类 列表
+    return request({
+        url: '/sort/category/findAllList',
         method: 'get'
     });
 }

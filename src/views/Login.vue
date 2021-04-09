@@ -98,7 +98,7 @@
     }
 </script>
 
-<style lang="less" scoped>
+<style scoped>
     .login{
         background-color: #2b4b6b;
         height: 100%;
@@ -112,25 +112,27 @@
         left: 50%;
         top: 50%;
         transform: translate(-50%,-50% );
-        .avatar_box{
-            height: 130px;
-            width: 130px;
-            border: 1px solid #eee;
-            border-radius: 50%;
-            padding: 10px;
-            box-shadow: 0 0 10px #ddd;
-            position: absolute;
-            left: 50%;
-            transform: translate(-50%,-50%);
-            background-color: #fff;
-            img{
-                height: 100%;
-                width: 100%;
-                border-radius: 50%;
-                background-color: #eee;
-            }
 
-        }
+    }
+    .avatar_box{
+        height: 130px;
+        width: 130px;
+        border: 1px solid #eee;
+        border-radius: 50%;
+        padding: 10px;
+        box-shadow: 0 0 10px #ddd;
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        background-color: #fff;
+
+
+    }
+    .avatar_box img{
+        height: 100%;
+        width: 100%;
+        border-radius: 50%;
+        background-color: #eee;
     }
     .login_from{
         position: absolute;

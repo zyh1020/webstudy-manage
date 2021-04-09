@@ -29,11 +29,11 @@
                         <el-rate v-model="courseVo.difficulty"></el-rate>
                     </el-form-item>
                     <el-form-item label="课程分类:">
-                        <el-select v-model="courseVo.sortParentId" placeholder="一级分类">
-                            <el-option v-for="sort in oneLevelSort" :label="sort.name" :value="sort.value" @change="loadTwoLevelSort(sort.value)"></el-option>
+                        <el-select v-model="courseVo.sortParentId" placeholder="一级分类" @change="loadTwoLevelSort">
+                            <el-option v-for="oneSort in oneLevelSort" :label="oneSort.name" :value="oneSort.id" :key="oneSort.id"></el-option>
                         </el-select>
-                        <el-select v-model="courseVo.sortParentId" placeholder="二级分类">
-                            <el-option v-for="sort in twoLevelSort" :label="sort.name" :value="sort.value"></el-option>
+                        <el-select v-model="courseVo.sortId" placeholder="二级分类">
+                            <el-option v-for="towSort in twoLevelSort" :label="towSort.name" :value="towSort.id" :key="towSort.id"></el-option>
                         </el-select>
                     </el-form-item>
 
@@ -73,6 +73,8 @@
 
 <script>
     import TinymceEditor from '@/components/tinymce';
+    import {getAllCategoryList} from '@/api/sort/category'
+    import {addOneCourseInfo,findOneCourseInfo} from '@/api/course/courseInfo'
     export default {
         name: "CourseInfo",
         components: { //注册TinymceEditor组件
@@ -83,15 +85,11 @@
                 headers:{
                     token: window.sessionStorage.getItem('token')
                 },
-                oneLevelSort:[{
-                    name: '后端',
-                    value: 'java'
-                }],
-                twoLevelSort:[{
-                    name: '后端',
-                    value: 'java'
-                }],
+                AllSort:[],
+                oneLevelSort:[],
+                twoLevelSort:[],
                 courseVo:{
+                    id:'',
                     title:'',
                     sortParentId:'',
                     sortId:'',
@@ -103,10 +101,55 @@
             }
         },
         methods:{
+            getAllSortList(){ // 获取所有分类
+                getAllCategoryList().then(response => {
+                    if(response){
+                       this.AllSort = response.data;
+                       this.loadOneLeveSort();
+                    }
+                });
+            },
+            addOneCourse(){ // 添加课程
+                addOneCourseInfo(this.courseVo).then(reponse =>{
+                    if(reponse){
+                        this.courseVo.id = reponse.data;
+                    }
+                });
+            },
+            findOneCourse(courseId){
+                findOneCourseInfo(courseId).then(response =>{
+                    if(response){
+                        this.courseVo = response.data;
+                        // 为了回显二级分类数据
+                        this.loadTwoLevelSort( this.courseVo.sortParentId);
+                    }
+                });
+            },
+            updateOrAddCourse() { // 修改或添加课程
+                if( this.courseVo.id != ''){ // 修改
+                    console.log("修改课程id："+this.courseVo.id);
+                }else { // 添加
+                    this.addOneCourse();
+                }
+            },
             imgUpload(){
 
             },
+            loadOneLeveSort(){ // 加载一级分类
+                this.oneLevelSort = []; //置空
+                for(let sort of this.AllSort){
+                    if(sort.level == 1){
+                        this.oneLevelSort.push(sort);
+                    }
+                }
+            },
             loadTwoLevelSort(oneLevelSortId){ // 加载二级分类
+                this.twoLevelSort = []; //置空
+                for(let sort of this.AllSort){
+                    if(sort.level == 2 && sort.parentId == oneLevelSortId){
+                        this.twoLevelSort.push(sort);
+                    }
+                }
 
             },
             beforeCourseCoverUpload(file){ // 上传课程封面
@@ -131,17 +174,23 @@
                     this.courseVo.courseCover = res.data;
                 }
             },
-            next(){
-                console.log("courseVo.description:"+this.courseVo.description);
-                // ①，添加课程信息后 返回课程id
+            async next(){
+                // ①，添加或信息后
+                await this.updateOrAddCourse();
                 // ②，跳转
                 this.$router.push({
                     path:'/cou/chapter',
-                    params:{ courseId:1 }
+                    query:{ courseId: this.courseVo.id}
                 })
 
-
-
+            }
+        },
+        created(){
+            // ①，获取所有的分类列表
+            this.getAllSortList();
+            // ②，判断是否需要查询数据
+            if(this.$route.query != null && this.$route.query.courseId != null){
+                this.findOneCourse(this.$route.query.courseId);
             }
         }
     }
