@@ -3,17 +3,17 @@
         <!-- 导航 -->
         <el-breadcrumb>
             <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item>课程添加</el-breadcrumb-item>
-            <el-breadcrumb-item>课程信息添加</el-breadcrumb-item>
+            <el-breadcrumb-item>课程管理</el-breadcrumb-item>
+            <el-breadcrumb-item>课程信息</el-breadcrumb-item>
         </el-breadcrumb>
         <!-- 卡片 -->
         <el-card>
             <div class="navSteps">
-                <h3 style="text-align: center">课程添加流程</h3>
+                <h3 style="text-align: center">课程操作流程</h3>
                 <el-steps :active="1">
-                    <el-step title="课程信息添加" icon="el-icon-edit"></el-step>
-                    <el-step title="课程章节添加" icon="el-icon-tickets"></el-step>
-                    <el-step title="课程最终发布" icon="el-icon-s-promotion"></el-step>
+                    <el-step title="课程信息" icon="el-icon-edit"></el-step>
+                    <el-step title="课程章节" icon="el-icon-tickets"></el-step>
+                    <el-step title="课程发布" icon="el-icon-s-promotion"></el-step>
                 </el-steps>
             </div>
             <div class="infoContent">
@@ -61,7 +61,9 @@
                         </div>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="next">保存并下一步</el-button>
+                        <el-button type="info" @click="toCourseList">首页</el-button>
+                        <el-button type="primary" @click="next">{{msg}}并下一步</el-button>
+                        <el-button type="success" @click="toChapter">未{{msg}}并下一步</el-button>
                     </el-form-item>
                 </el-form>
 
@@ -74,7 +76,7 @@
 <script>
     import TinymceEditor from '@/components/tinymce';
     import {getAllCategoryList} from '@/api/sort/category'
-    import {addOneCourseInfo,findOneCourseInfo} from '@/api/course/courseInfo'
+    import {addOneCourseInfo,findOneCourseInfo,updateOneCourseInfo} from '@/api/course/courseInfo'
     export default {
         name: "CourseInfo",
         components: { //注册TinymceEditor组件
@@ -88,6 +90,7 @@
                 AllSort:[],
                 oneLevelSort:[],
                 twoLevelSort:[],
+                msg:'添加',
                 courseVo:{
                     id:'',
                     title:'',
@@ -113,6 +116,22 @@
                 addOneCourseInfo(this.courseVo).then(reponse =>{
                     if(reponse){
                         this.courseVo.id = reponse.data;
+                        // ②，跳转
+                        this.$router.push({
+                            path:'/cou/chapter',
+                            query:{ courseId: this.courseVo.id}
+                        })
+                    }
+                });
+            },
+            updateOneCourse(){ // 修改课程
+                updateOneCourseInfo(this.courseVo).then(response =>{
+                    if(response){
+                        // ②，跳转
+                        this.$router.push({
+                            path:'/cou/chapter',
+                            query:{ courseId: this.courseVo.id}
+                        })
                     }
                 });
             },
@@ -127,7 +146,8 @@
             },
             updateOrAddCourse() { // 修改或添加课程
                 if( this.courseVo.id != ''){ // 修改
-                    console.log("修改课程id："+this.courseVo.id);
+                    console.log("修改课程id："+ this.courseVo.id);
+                    this.updateOneCourse();
                 }else { // 添加
                     this.addOneCourse();
                 }
@@ -174,15 +194,23 @@
                     this.courseVo.courseCover = res.data;
                 }
             },
+            // 保存并下一步
             async next(){
-                // ①，添加或信息后
+
                 await this.updateOrAddCourse();
-                // ②，跳转
+
+
+            },
+            // 下一步
+            toChapter(){
                 this.$router.push({
                     path:'/cou/chapter',
                     query:{ courseId: this.courseVo.id}
                 })
-
+            },
+            // 回到课程列表界面
+            toCourseList(){
+                this.$router.replace('/cou/list');
             }
         },
         created(){
@@ -191,6 +219,7 @@
             // ②，判断是否需要查询数据
             if(this.$route.query != null && this.$route.query.courseId != null){
                 this.findOneCourse(this.$route.query.courseId);
+                this.msg = '修改';
             }
         }
     }

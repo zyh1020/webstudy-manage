@@ -15,3 +15,19 @@ export function findOneCourseAllCapter(courseId) { // 查询某个课程的所�
     });
 }
 
+
+export function updateOneCapter(params) { // 修改章节
+    return request({
+        url: '/cou/capter/updateOneCapter',
+        method: 'post',
+        data: params
+    });
+}
+
+export function deleteOneCapter(capterId) { // 查询某个课程的所有章节
+    return request({
+        url: '/cou/capter/deleteOneCapter/'+capterId,
+        method: 'get'
+    });
+}
+

@@ -13,16 +13,16 @@
             <div class="addRole">
                 <el-row :gutter="20">
                     <el-col :span="10">
-                        <el-input placeholder="请输入角色英文名称" size="medium" v-model="role.name">
-                            <template #prepend>ROLE_</template>
+                        <el-input placeholder="请输入角色英文名称" size="medium" v-model="name">
+                            <template slot="prepend">ROLE_</template>
                         </el-input>
                     </el-col>
-                    <el-col :span="10">
-                            <el-input placeholder="请输入角色英文名称" size="medium" v-model="role.nameZh">
-                        </el-input>
+                    <el-col :span="6">
+                            <el-input placeholder="请输入角色英文名称" size="medium" v-model="nameZh"></el-input>
                     </el-col>
-                    <el-col :span="4">
-                        <el-button type="primary" size="medium" icon="el-icon-plus"> 添加 </el-button>
+                    <el-col :span="8">
+                            <el-button v-show="!updateRole" type="primary" size="medium" icon="el-icon-plus" @click="addRole">添加 </el-button>
+                            <el-button v-show="updateRole" type="success" size="medium" icon="el-icon-edit" @click="updateOneRole">修改 </el-button>
                     </el-col>
                 </el-row>
             </div>
@@ -77,8 +77,8 @@
                             label="操作"
                             width="180">
                         <template slot-scope="scope">
-                            <el-button type="danger" icon="el-icon-delete" size="mini"/>
-                            <el-button type="primary" icon="el-icon-edit" size="mini"/>
+                            <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteRole(scope.row)"/>
+                            <el-button type="primary" icon="el-icon-edit" size="mini" @click="showUpdateValue(scope.row)"/>
                             <el-button type="info" icon="el-icon-setting" size="mini" @click="showSetRightDialog(scope.row)"/>
                         </template>
                     </el-table-column>
@@ -112,7 +112,7 @@
 </template>
 
 <script>
-    import {getAllRoles,doAssion,deleteAssion} from '@/api/security/role'
+    import {getAllRoles,doAssion,deleteAssion,addOneRole,updateOneRole,deleteOneRole} from '@/api/security/role'
     import {getAllAuthority} from '@/api/security/menu'
     export default {
         name: "SysRole",
@@ -126,9 +126,10 @@
                     children: 'children', // 树父子嵌套的方式
                     label: 'name' // 显示的名称
                 },
+                name:null,
+                nameZh:null,
+                updateRole:false,
                 role:{
-                    name:"",
-                    nameZh:"",
                 },
                 contentRoles:[]
             }
@@ -218,6 +219,53 @@
                     }
 
                 }
+            },
+            addRole(){ // 添加角色
+                this.role.name = "ROLE_"+this.name;
+                this.role.nameZh = this.nameZh;
+                addOneRole(this.role).then(response =>{
+                    if(response){
+                        // 重新获取角色列表
+                        this.getRolesList();
+                    }
+                });
+            },
+            deleteRole(role){ // 删除角色
+                this.$confirm('此操作将永久删除<'+role.nameZh+'> 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    deleteOneRole(role.id).then(response =>{
+                        if(response){
+                            // 重新获取角色列表
+                            this.getRolesList();
+                        }
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            // 修改角色
+            showUpdateValue(role){
+                this.updateRole = true;
+                this.name = role.name.replace("ROLE_","");
+                this.nameZh = role.nameZh;
+                this.role.id = role.id;
+            },
+            updateOneRole(){
+                this.updateRole = false;
+                this.role.name = "ROLE_"+this.name;
+                this.role.nameZh = this.nameZh;
+                updateOneRole(this.role).then(response => {
+                    if(response){
+                        // 重新获取角色列表
+                        this.getRolesList();
+                    }
+                })
             }
         },
         created() {

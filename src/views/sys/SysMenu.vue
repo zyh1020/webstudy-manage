@@ -9,6 +9,7 @@
 
         <!-- 卡片 -->
         <el-card>
+            <el-button type="primary" @click="addOneLeveMenu">添加菜单</el-button>
             <!-- 树型表格 -->
             <el-table
                     default-expand-all
@@ -49,11 +50,10 @@
                 <el-table-column
                         label="操作">
                     <template #default="scope">
-                        <el-button type="danger"  icon="el-icon-delete" size="mini"/>
-                        <el-button type="primary" icon="el-icon-edit" size="mini"/>
-                        <el-button type="primary" @click="menuAdd(scope.row)" v-if = "scope.row.level != 3" icon="el-icon-plus" size="mini"/>
+                        <el-button type="danger"  icon="el-icon-delete" size="mini" @click="deleteMenu(scope.row)"/>
+                        <el-button type="primary" icon="el-icon-edit" @click="showUpDateMenu(scope.row)" size="mini"/>
+                        <el-button type="primary" @click="showAddMenu(scope.row)" v-if = "scope.row.level != 3" icon="el-icon-plus" size="mini"/>
                     </template>
-
                 </el-table-column>
             </el-table>
         </el-card>
@@ -64,7 +64,7 @@
                 :visible.sync="menuDialogShow"
                 width="50%">
             <!-- 表单 -->
-            <el-form ref="form" :model="addMenu" label-width="80px">
+            <el-form ref="form" :model="addOrUpdateMenu" label-width="80px">
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="父级菜单">
@@ -73,7 +73,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="菜单名称">
-                            <el-input v-model="addMenu.name"></el-input>
+                            <el-input v-model="addOrUpdateMenu.name"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -81,12 +81,12 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="菜单图标">
-                            <el-input v-model="addMenu.icon"></el-input>
+                            <el-input v-model="addOrUpdateMenu.icon"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="拦截路径">
-                            <el-input v-model="addMenu.url"></el-input>
+                            <el-input v-model="addOrUpdateMenu.url"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -94,24 +94,24 @@
                 <el-row :gutter="20">
                     <el-col :span="12">
                         <el-form-item label="组件路径">
-                            <el-input v-model="addMenu.path"></el-input>
+                            <el-input v-model="addOrUpdateMenu.path"></el-input>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="组件名称">
-                            <el-input v-model="addMenu.component"></el-input>
+                            <el-input v-model="addOrUpdateMenu.component"></el-input>
                         </el-form-item>
                     </el-col>
                 </el-row>
 
                 <el-form-item label="隐藏路由">
-                    <el-switch v-model="addMenu.hidden"></el-switch>
+                    <el-switch v-model="addOrUpdateMenu.hidden"></el-switch>
                 </el-form-item>
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
                   <el-button @click="menuDialogShow = false">取 消</el-button>
-                  <el-button type="primary" @click="menuDialogShow = false">确 定</el-button>
+                  <el-button type="primary" @click="addUpdateMenu">确 定</el-button>
                 </span>
             </template>
         </el-dialog>
@@ -120,14 +120,14 @@
 </template>
 
 <script>
-    import {getAllAuthority} from '@/api/security/menu'
+    import {getAllAuthority,addOneMenu,updateOneMenu,removeMenu} from '@/api/security/menu'
 
     export default {
         name: "SysMenu",
         data(){
             return{
                 menuDialogShow: false,
-                addMenu:{
+                addOrUpdateMenu:{
                     name:'',
                     parentId:'',
                     url:'',
@@ -142,10 +142,26 @@
             }
         },
         methods:{
-            // 三级菜单弹出框
-            menuAdd(row){
-                this.addMenu.parentId = row.id;
+            // 添加一级菜单
+            addOneLeveMenu(){
+                this.addOrUpdateMenu.parentId = 0;
+                this.addOrUpdateMenu.id = null;
+                this.parentName = 'Web学习交流平台';
+                this.menuDialogShow = true;
+            },
+            // 添加二级三级菜单弹出框
+            showAddMenu(row){
+                this.addOrUpdateMenu.parentId = row.id;
+                this.addOrUpdateMenu.id = null;
                 this.parentName = row.name;
+                this.menuDialogShow = true;
+            },
+            // 修改弹框
+            showUpDateMenu(menu){
+                if(menu.parentId == 0){
+                    this.parentName = 'Web学习交流平台';
+                }
+                this.addOrUpdateMenu = menu;
                 this.menuDialogShow = true;
             },
             // 获取所有的菜单
@@ -156,7 +172,56 @@
                         this.treeMenusDatas =response.data;
                     }
                 });
+            },
+            // 添加
+            addMenu(){
+                addOneMenu(this.addOrUpdateMenu).then(response =>{
+                    if(response){
+                        // ①，获取所有的菜单
+                        this.getAuthorityList();
+                        this.menuDialogShow = false;
+                    }
+                });
+            },
+            // 修改
+            updateMenu(){
+                updateOneMenu(this.addOrUpdateMenu).then(response => {
+                    if(response){
+                        // ①，获取所有的菜单
+                        this.getAuthorityList();
+                        this.menuDialogShow = false;
+                    }
+                })
+            },
+            // 删除菜单
+            deleteMenu(menu){
+                this.$confirm('此操作将永久删除<'+menu.name+'> 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    removeMenu(menu.id).then(response =>{
+                        if(response){
+                            // ①，获取所有的菜单
+                            this.getAuthorityList();
+                        }
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            // 添加或修改
+            addUpdateMenu(){
+                if(this.addOrUpdateMenu.id != null){ // 修改
+                    this.updateMenu();
+                }else{ // 添加
+                    this.addMenu();
+                }
             }
+
         },
         created(){
             // ①，获取所有的菜单

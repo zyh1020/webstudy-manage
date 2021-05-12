@@ -13,43 +13,24 @@
                 <el-row :gutter="20">
                     <el-col :span="10">
                         <el-input
+                                v-model="userName"
                                 prefix-icon="el-icon-search"
                                 placeholder="请输入用户名进行搜索"
-                                size="medium"
-                                :disabled="seniorSearchShow"/>
+                                size="medium"/>
                     </el-col>
                     <el-col :span="4">
-                        <el-button type="primary" size="medium" icon="el-icon-search" :disabled="seniorSearchShow">搜索
+                        <el-button type="primary" size="medium" icon="el-icon-search" @click="getUserList">搜索
                         </el-button>
-                    </el-col>
-                    <el-col :span="5">
-                        <el-button type="primary" size="medium"
-                                   :icon="seniorSearchShow ? 'el-icon-arrow-up':'el-icon-arrow-down'"
-                                   @click="clickSeniorSearch"> 高级搜索
-                        </el-button>
-                    </el-col>
-                    <el-col :span="5">
-                        <el-button type="success" size="medium" icon="el-icon-plus"> 添加用户</el-button>
                     </el-col>
                 </el-row>
             </div>
-            <!-- 高级搜索 -->
-            <transition name="slide-fade"> <!-- transition是v-show的过度动画-->
-                <div class="seniorSearch" v-show="seniorSearchShow">
-                    <el-button type="primary" icon="el-icon-search" size="medium">搜索</el-button>
-                    <el-button type="primary" size="medium">置空</el-button>
-                </div>
-            </transition>
+
             <!-- 数据表格 -->
             <div class="tableData">
                 <el-table
                         :data="userList"
                         stripe
                         style="width: 80%">
-                    <el-table-column
-                            type="selection"
-                            width="55">
-                    </el-table-column>
                     <el-table-column
                             prop="id"
                             label="编号">
@@ -63,13 +44,16 @@
                             label="昵称">
                     </el-table-column>
                     <el-table-column
-                            prop="address"
-                            label="地址">
+                            label="头像">
+                        <template #default="scope">
+                            <el-link @click="lookUserCover(scope.row.userAvatar)" type="info">点击查看头像</el-link>
+                        </template>
                     </el-table-column>
                     <el-table-column
                             label="是否启用">
                         <template #default="scope">
                             <el-switch
+                                    @change="updateUserState(scope.row)"
                                     v-model="scope.row.enabled"
                                     active-color="#13ce66"
                                     inactive-color="#ff4949">
@@ -79,8 +63,7 @@
                     <el-table-column
                             label="操作">
                         <template slot-scope="scope">
-                            <el-button type="danger" icon="el-icon-delete" size="mini"/>
-                            <el-button type="primary" icon="el-icon-edit" size="mini"/>
+                            <el-button type="danger" icon="el-icon-delete" @click="deleteUser(scope.row)" size="mini"/>
                             <el-button @click="distributionRoles(scope.row)" type="info" icon="el-icon-s-custom" size="mini"/>
                         </template>
                     </el-table-column>
@@ -106,11 +89,18 @@
                 </span>
             </template>
         </el-dialog>
+
+        <!-- 对话框 -->
+        <el-dialog
+                title="课程封面"
+                :visible.sync="showUserCover">
+            <img :src="userImg">
+        </el-dialog>
     </div>
 </template>
 
 <script>
-    import {getAllUsers,distributionRoles} from '@/api/security/user'
+    import {getAllUsers,distributionRoles,setUserState,deleteOneUser} from '@/api/security/user'
     import {findAllRoles} from '@/api/security/role'
     export default {
         name: "SysCfg",
@@ -123,15 +113,17 @@
                     key: 'id',
                     label: 'nameZh'
                 },
-                seniorSearchShow: false,
+                userImg:'',
+                showUserCover:false,
                 rolesDialogShow: false,
-                userList: []
+                userList: [],
+                userName:null
             }
         },
         methods: {
-            // 切换高级搜索
-            clickSeniorSearch() {
-                this.seniorSearchShow = !this.seniorSearchShow;
+            lookUserCover(imgUrl){
+                this.userImg = imgUrl;
+                this.showUserCover = true;
             },
             // 分配角色弹框
             async distributionRoles(user) {
@@ -157,7 +149,11 @@
             },
             // 获取用户列表
             getUserList() {
-                getAllUsers().then(response => {
+                let param = this.userName;
+                if( param == null || param == ''){
+                    param = 'all'
+                }
+                getAllUsers(param).then(response => {
                     if (response) {
                         this.userList = response.data;
                     }
@@ -183,6 +179,33 @@
 
 
 
+            },
+            // 删除一个用户
+            deleteUser(user){
+                this.$confirm('此操作将永久删除<'+user.name+'> 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    removeMenu(user.id).then(response =>{
+                        if(response){
+                            this.getUserList();
+                        }
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            // 修改用户状态
+            updateUserState(user){
+                setUserState(user.id,user.enabled).then(response => {
+                    if(response){
+
+                    }
+                });
             }
         },
         created() {

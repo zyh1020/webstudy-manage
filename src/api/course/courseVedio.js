@@ -15,3 +15,17 @@ export function deleteAliyunVedio(vedioId) { // 删除视频
         method: 'get',
     });
 }
+
+export function updateOneVedio(params) { // 修改小节
+    return request({
+        url: '/cou/vedio/updateVedio',
+        method: 'post',
+        data: params
+    });
+}
+export function deleteOneVedio(vedioId) { // 删除小节
+    return request({
+        url: '/cou/vedio/deleteOneVedio/'+vedioId,
+        method: 'get',
+    });
+}

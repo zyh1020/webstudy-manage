@@ -3,18 +3,18 @@
         <!-- 导航 -->
         <el-breadcrumb>
             <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item>课程添加</el-breadcrumb-item>
-            <el-breadcrumb-item>课程最终发布</el-breadcrumb-item>
+            <el-breadcrumb-item>课程管理</el-breadcrumb-item>
+            <el-breadcrumb-item>课程发布</el-breadcrumb-item>
         </el-breadcrumb>
 
         <!-- 卡片 -->
         <el-card>
             <div class="navSteps">
-                <h3 style="text-align: center">课程添加流程</h3>
+                <h3 style="text-align: center">课程操作流程</h3>
                 <el-steps :active="3">
-                    <el-step title="课程信息添加" icon="el-icon-edit"></el-step>
-                    <el-step title="课程章节添加" icon="el-icon-tickets"></el-step>
-                    <el-step title="课程最终发布" icon="el-icon-s-promotion"></el-step>
+                    <el-step title="课程信息" icon="el-icon-edit"></el-step>
+                    <el-step title="课程章节" icon="el-icon-tickets"></el-step>
+                    <el-step title="课程发布" icon="el-icon-s-promotion"></el-step>
                 </el-steps>
             </div>
             <div class="infoContent">
@@ -73,7 +73,8 @@
                     <el-row>
                         <div style="float:right; margin-right: 0;">
                             <el-button type="primary" @click="pervious">上一步</el-button>
-                            <el-button type="primary" @click="next">确认发布</el-button>
+                            <el-button type="primary" @click="isPublish" :disabled="courseVo.courseStatus">确认发布</el-button>
+                            <el-button type="primary" @click="noPublish" :disabled="!courseVo.courseStatus">取消发布</el-button>
                         </div>
                     </el-row>
                 </el-card>
@@ -86,7 +87,7 @@
 
 <script>
     import {findOneCourseAllCapter} from '@/api/course/courseChapter'
-    import {findOneCourseInfo} from '@/api/course/courseInfo'
+    import {findOneCourseInfo,updateCourseStatus} from '@/api/course/courseInfo'
     import {getAllCategoryList} from '@/api/sort/category'
     export default {
         name: "CoursePublish",
@@ -147,8 +148,18 @@
                     query:{ courseId:this.currentCourseId }
                 })
             },
-            next(){ // 确认发布
-
+            updateStatus(courseId,status){
+                updateCourseStatus(courseId,status).then(response=> {
+                    if(response){
+                        this.initData();
+                    }
+                });
+            },
+            isPublish(){ // 确认发布
+                this.updateStatus(this.currentCourseId,true);
+            },
+            noPublish(){ // 取消发布
+                this.updateStatus(this.currentCourseId,false);
             }
 
         },

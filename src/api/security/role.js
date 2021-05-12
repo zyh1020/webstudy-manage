@@ -37,3 +37,30 @@ export function deleteAssion(roleId,menuId) {
         }
     })
 }
+
+
+// 添加角色信息
+export function addOneRole(role) {
+    return request({
+        url: '/system/roles/addOneRole',
+        method: 'post',
+        data:role
+    });
+}
+
+
+// 修改角色信息
+export function updateOneRole(role) {
+    return request({
+        url: '/system/roles/updateOneRole',
+        method: 'post',
+        data:role
+    });
+}
+// 删除角色信息
+export function deleteOneRole(roleId) {
+    return request({
+        url: '/system/roles/deleteOneRole/'+roleId,
+        method: 'get'
+    });
+}
